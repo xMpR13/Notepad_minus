@@ -90,6 +90,7 @@ class NotePadLibrary extends JFrame implements ActionListener {
 
         //---------------text area
         area = new JTextArea(25, 25);
+        area.setWrapStyleWord(true);
         xy = new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         //---------------text area
 
@@ -120,10 +121,8 @@ class NotePadLibrary extends JFrame implements ActionListener {
                     writer.write(text);
                     writer.newLine();
                     writer.close();
-
+                    JOptionPane.showMessageDialog(null, "File saved");
                 }
-
-                JOptionPane.showMessageDialog(null, "File saved");
 
             } catch (IOException ex) {
                 Logger.getLogger(NotePadLibrary.class.getName()).log(Level.SEVERE, null, ex);
