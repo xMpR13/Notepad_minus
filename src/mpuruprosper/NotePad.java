@@ -43,6 +43,7 @@ class NotePadLibrary extends JFrame implements ActionListener {
     private BufferedWriter writer;
     private BufferedReader reader;
     private JFileChooser fileChooser;
+    private final JMenuItem clearItem;
 
     public NotePadLibrary() {
 
@@ -65,10 +66,14 @@ class NotePadLibrary extends JFrame implements ActionListener {
         loadItem.addActionListener(this);
         exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(this);
+        clearItem = new JMenuItem("Clear");
+        clearItem.addActionListener(this);
 
         //adds items to menu bar
         FileMenu.add(saveItem);
         FileMenu.add(loadItem);
+        FileMenu.addSeparator();
+        FileMenu.add(clearItem);
         FileMenu.addSeparator();
         FileMenu.add(exitItem);
 
@@ -78,7 +83,7 @@ class NotePadLibrary extends JFrame implements ActionListener {
         //file menu
         aboutMenu = new JMenu("About");
 
-        aboutItem = new JMenuItem("About");
+        aboutItem = new JMenuItem("About NotePad-");
         aboutItem.addActionListener(this);
 
         aboutMenu.add(aboutItem);
@@ -157,7 +162,9 @@ class NotePadLibrary extends JFrame implements ActionListener {
         } else if (exitItem == e.getSource()) {
             System.exit(0);
         } else if (aboutItem == e.getSource()) {
-            JOptionPane.showMessageDialog(null, "prosper was here doing stuff");
+            JOptionPane.showMessageDialog(null, "NotePad- \nVersion 1.2");
+        }else if (clearItem == e.getSource()) {
+            area.setText("");
         }
     }
 }
