@@ -1,170 +1,137 @@
 package mpuruprosper;
 
-// prospermpuru was here🙃🙃
-
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.logging.*;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import java.awt.event.KeyEvent;
+import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class NotePad {
 
     public static void main(String[] args) {
-        new NotePadLibrary();
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            new NotePadLibrary();
+        });
     }
-
 }
 
 class NotePadLibrary extends JFrame implements ActionListener {
 
-    private final JTextArea area;
-    private JMenuBar menuBar;
-    private final JMenuItem saveItem;
-    private final JMenuItem loadItem;
-    private final JMenuItem aboutItem;
-    private final JMenuItem exitItem;
-    private final JScrollPane xy;
-    private final JMenu FileMenu;
-    private final JMenu aboutMenu;
-    private BufferedWriter writer;
-    private BufferedReader reader;
-    private JFileChooser fileChooser;
-    private final JMenuItem clearItem;
+    private JTextArea area;
+    private JMenuItem saveItem, loadItem, aboutItem, exitItem, clearItem;
 
     public NotePadLibrary() {
+        super("Notepad");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(500, 300);
+        setLocationRelativeTo(null);
+        setupMenuBar();
+        setupTextArea();
+        setVisible(true);
+    }
 
-        JFrame frame = new JFrame("Notepad");
-        frame.setDefaultCloseOperation(3);
-        //frame.setAlwaysOnTop(true);
-        frame.setSize(400, 250);
-        frame.setResizable(false);
-        frame.setLocationRelativeTo(null);
+    private void setupTextArea() {
+        area = new JTextArea();
+        area.setFont(new Font("Consolas", Font.PLAIN, 14));
+        JScrollPane scrollPane = new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        add(scrollPane, BorderLayout.CENTER);
+    }
 
-        //---------------Menu bar
-        menuBar = new JMenuBar();
+    private void setupMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.add(createFileMenu());
+        menuBar.add(createHelpMenu());
+        setJMenuBar(menuBar);
+    }
 
-        //file menu
-        FileMenu = new JMenu("File");
+    private JMenu createFileMenu() {
+        JMenu fileMenu = new JMenu("File");
+        fileMenu.setMnemonic(KeyEvent.VK_F);
 
-        saveItem = new JMenuItem("Save");
-        saveItem.addActionListener(this);
-        loadItem = new JMenuItem("Load");
-        loadItem.addActionListener(this);
-        exitItem = new JMenuItem("Exit");
-        exitItem.addActionListener(this);
-        clearItem = new JMenuItem("Clear");
-        clearItem.addActionListener(this);
+        saveItem = createMenuItem("Save", KeyEvent.VK_S, KeyEvent.VK_S, "icons/save.png");
+        loadItem = createMenuItem("Open", KeyEvent.VK_O, KeyEvent.VK_O, "icons/open.png");
+        clearItem = createMenuItem("Clear", KeyEvent.VK_C, KeyEvent.VK_C, "icons/clear.png");
+        exitItem = createMenuItem("Exit", KeyEvent.VK_E, KeyEvent.VK_Q, "icons/exit.png");
 
-        //adds items to menu bar
-        FileMenu.add(saveItem);
-        FileMenu.add(loadItem);
-        FileMenu.addSeparator();
-        FileMenu.add(clearItem);
-        FileMenu.addSeparator();
-        FileMenu.add(exitItem);
+        fileMenu.add(loadItem);
+        fileMenu.add(saveItem);
+        fileMenu.addSeparator();
+        fileMenu.add(clearItem);
+        fileMenu.addSeparator();
+        fileMenu.add(exitItem);
 
-        //---------------About menu bar
-        menuBar = new JMenuBar();
+        return fileMenu;
+    }
 
-        //file menu
-        aboutMenu = new JMenu("About");
+    private JMenu createHelpMenu() {
+        JMenu helpMenu = new JMenu("Help");
+        helpMenu.setMnemonic(KeyEvent.VK_H);
 
-        aboutItem = new JMenuItem("About NotePad-");
-        aboutItem.addActionListener(this);
+        aboutItem = createMenuItem("About", KeyEvent.VK_A, 0, "icons/about.png");
+        helpMenu.add(aboutItem);
 
-        aboutMenu.add(aboutItem);
+        return helpMenu;
+    }
 
-        //adds menubar to frame
-        menuBar.add(FileMenu);
-        menuBar.add(aboutMenu);
-        //---------------Menu bar
-
-        //---------------text area
-        area = new JTextArea(25, 25);
-        area.setWrapStyleWord(true);
-        xy = new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        //---------------text area
-
-        frame.setJMenuBar(menuBar);
-        frame.add(xy);
-
-        //frame.pack();
-        frame.setVisible(true);
+    private JMenuItem createMenuItem(String text, int mnemonic, int acceleratorKey, String iconPath) {
+        JMenuItem item = new JMenuItem(text, new ImageIcon(iconPath));
+        item.setMnemonic(mnemonic);
+        if (acceleratorKey != 0) {
+            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, ActionEvent.CTRL_MASK));
+        }
+        item.addActionListener(this);
+        return item;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
-        if (saveItem == e.getSource()) {
-
-            String text = area.getText();
-
-            try {
-
-                fileChooser = new JFileChooser();
-
-                if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-
-                    File file = fileChooser.getSelectedFile();
-
-                    writer = new BufferedWriter(new FileWriter(file, false));
-
-                    writer.write(text);
-                    writer.newLine();
-                    writer.close();
-                    JOptionPane.showMessageDialog(null, "File saved");
-                }
-
-            } catch (IOException ex) {
-                Logger.getLogger(NotePadLibrary.class.getName()).log(Level.SEVERE, null, ex);
+        try {
+            if (e.getSource() == saveItem) {
+                saveToFile();
+            } else if (e.getSource() == loadItem) {
+                loadFromFile();
+            } else if (e.getSource() == exitItem) {
+                System.exit(0);
+            } else if (e.getSource() == aboutItem) {
+                JOptionPane.showMessageDialog(this, "NotePad-\nVersion 1.2\nA simple text editing tool.", "About Notepad", JOptionPane.INFORMATION_MESSAGE);
+            } else if (e.getSource() == clearItem) {
+                area.setText("");
             }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
-        } else if (loadItem == e.getSource()) {
-
-            String data = "", str;
-            fileChooser = new JFileChooser();
-
-            if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-
-                try {
-                    File file = fileChooser.getSelectedFile();
-
-                    reader = new BufferedReader(new FileReader(file));
-
-                    while ((str = reader.readLine()) != null) {
-                        data += str + "\n";
-                    }
-                    reader.close();
-
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(NotePadLibrary.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
-                    Logger.getLogger(NotePadLibrary.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                area.setText(data);
-
+    private void saveToFile() throws IOException {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save As");
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Text Files (*.txt)", "txt"));
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                area.write(writer);
             }
-        } else if (exitItem == e.getSource()) {
-            System.exit(0);
-        } else if (aboutItem == e.getSource()) {
-            JOptionPane.showMessageDialog(null, "NotePad- \nVersion 1.2");
-        }else if (clearItem == e.getSource()) {
-            area.setText("");
+        }
+    }
+
+    private void loadFromFile() throws IOException {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Open File");
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Text Files (*.txt)", "txt"));
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                area.read(reader, null);
+            }
         }
     }
 }
